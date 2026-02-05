@@ -1,0 +1,7 @@
+File handler design class
+
+Goals:
+To centralize all direct file access. Other classes request file contents through FileHandler on
+1) ./data in directory
+2) if not found then search the parent directory for then look through the parent directories
+
