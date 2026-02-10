@@ -1,0 +1,52 @@
+TopSecret - User Interface (command-line) reference
+
+Purpose
+-------
+Documents the command-line options handled by the `Userinterface` class.
+`Userinterface` parses and validates CLI args and prints usage/help/error messages.
+It does NOT perform program logic or access files directly; a `ProgramControl`
+implementation may be injected for the program actions.
+
+Usage
+-----
+  java TopSecret
+  java TopSecret <fileNumber>
+  java TopSecret <fileNumber> <keyFile>
+
+Behavior / Options
+------------------
+- No arguments
+  - Action: List available files.
+  - Output: prints "Listing available files" and (if injected) calls
+    ProgramControl.listFiles().
+
+- One argument: <fileNumber>
+  - Action: Display the specified file using the default key file.
+  - Default key file: key.txt
+  - Output: prints "Displaying file <fileNumber> using default key" and (if
+    injected) calls ProgramControl.showFile(<fileNumber>, "key.txt").
+
+- Two arguments: <fileNumber> <keyFile>
+  - Action: Display the specified file using the provided key file.
+  - Output: prints "Displaying file <fileNumber> using key <keyFile>" and (if
+    injected) calls ProgramControl.showFile(<fileNumber>, <keyFile>).
+
+Validation rules
+----------------
+- <fileNumber> must be exactly two digits (regex: "\\d{2}"), e.g. "01", "42".
+  If invalid, Userinterface prints an error: "Invalid file number. Expected two digits (e.g., 01)." and the usage.
+
+- <keyFile> must not be blank (non-null and not all whitespace). If blank,
+  the program prints: "Key file cannot be empty." and the usage.
+
+- If args == null (rare/invalid caller), Userinterface prints: "Arguments cannot be null." and the usage.
+
+- If more than two arguments are provided, Userinterface prints: "Too many arguments." and the usage.
+
+Examples
+--------
+  java TopSecret
+  java TopSecret 01
+  java TopSecret 01 mykey.txt
+
+This document reflects the CLI contract implemented by `src/main/java/Userinterface.java`.
