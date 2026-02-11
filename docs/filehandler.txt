@@ -1,7 +1,33 @@
-File handler design class
+TopSecret
+2/8/26
+Neel Naglapur (Team Member B)
 
-Goals:
-To centralize all direct file access. Other classes request file contents through FileHandler on
-1) ./data in directory
-2) if not found then search the parent directory for then look through the parent directories
+Goal:
+The goal of the FileHandler component is to centralize all direct access to files.
+No other class in the program reads from or interacts with the filesystem directly.
+
+Assumptions:
+The program is executed from the project root directory.
+A folder named "data" already exists in the working directory and contains all
+text files that may be read by the program.
+
+Responsibilities:
+- Locate the existing data directory in the working directory.
+- Provide a list of available .txt files stored in the data folder.
+- Read and return the contents of a requested file as text.
+- Validate filenames to prevent invalid or unsafe file access.
+
+Design:
+Other components request file information through the FileHandler interface.
+FileHandler handles all file reading and returns results or throws errors when
+files cannot be found or accessed.
+
+Error Handling:
+- If the data directory does not exist, the program fails immediately.
+- If a requested file does not exist, an error is returned to the caller.
+- Invalid filenames are rejected.
+
+Testing Plan:
+Unit tests verify that files can be listed from the data directory, file contents
+can be read correctly, and appropriate errors are thrown for missing or invalid files.
 
