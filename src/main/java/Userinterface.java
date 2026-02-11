@@ -43,6 +43,7 @@ public class Userinterface {
     // ---------- Argument handlers ----------
 
     private static void handleList() {
+        System.out.println("Listing available files...");
         // TODO (Role C): ProgramControl.listFiles();
     }
 

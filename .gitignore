@@ -11,12 +11,6 @@ build/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
-.idea/gradle.xml
-.idea/misc.xml
-.idea/copilot.data.migration.ask2agent.xml
-
-build.gradle.kts
-
 *.iws
 *.iml
 *.ipr
