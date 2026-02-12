@@ -14,6 +14,11 @@ public final class ProgramControl {
         this.defaultKeyPath = Objects.requireNonNull(defaultKeyPath);
     }
 
+    public ProgramControl(FileHandler fileHandler, CipherService cipherService) {
+        this(fileHandler, cipherService, "ciphers/default.key");
+    }
+
+
     // Returns exactly what main should print (easy to unit test).
     public String execute(String[] args) {
         if (args == null) args = new String[0];
@@ -75,4 +80,61 @@ public final class ProgramControl {
         try { return Integer.parseInt(s); }
         catch (NumberFormatException e) { return null; }
     }
+
+    public void run(String[] args) {
+
+        List<String> files;
+        try {
+            files = fileHandler.listDataFiles();
+        } catch (Exception e) {
+            System.out.println("Error");
+            return;
+        }
+
+        // case 1: no args -> print menu
+        if (args == null || args.length == 0) {
+            for (int i = 0; i < files.size(); i++) {
+                System.out.printf("%02d %s%n", i + 1, files.get(i));
+            }
+            return;
+        }
+
+        // (optional) too many args
+        if (args.length > 2) {
+            System.out.println("Invalid selection");
+            return;
+        }
+
+        // case 2: one arg -> treat as selection like "01"
+        int choice;
+        try {
+            choice = Integer.parseInt(args[0].trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection");
+            return;
+        }
+
+        if (choice < 1 || choice > files.size()) {
+            System.out.println("Invalid selection");
+            return;
+        }
+
+        String filename = files.get(choice - 1);
+
+        // Optional second arg => alternate key path
+        String keyPath = (args.length == 2) ? args[1] : defaultKeyPath;
+
+        try {
+            String cipherText = fileHandler.readFile(filename);
+            String plainText = cipherService.decipher(cipherText, keyPath);
+            System.out.println(plainText);
+        } catch (Exception e) {
+            System.out.println("Error");
+        }
+    }
+
+
+
 }
+
+
