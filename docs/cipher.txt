@@ -1,0 +1,52 @@
+TopSecret
+2/12/26
+Team Member D
+
+Goal:
+The goal of the Cipher component is to convert (decipher) ciphered mission text
+into readable plain text.
+
+Key File Location & Format:
+- Cipher keys are stored in a folder named "ciphers" in the project root.
+- The default key filename is "key.txt".
+- A key file contains 2 lines:
+  Line 1: actual/plain character set (what each cipher char should become)
+  Line 2: cipher character set (what appears in the file)
+
+Example:
+Line 1 (actual): abcdef
+Line 2 (cipher): bcdefa
+
+This means cipher 'b' decodes to actual 'a', cipher 'c' decodes to 'b', etc.
+
+Validation Rules:
+When a cipher key is loaded it must be validated to ensure deciphering is
+unambiguous:
+- Must have at least 2 lines.
+- Line 1 and Line 2 must be the same length.
+- Neither line may be empty.
+- No duplicates allowed within Line 1.
+- No duplicates allowed within Line 2.
+
+Deciphering Behavior:
+- Each character in the ciphered text is checked against the cipher mapping.
+- If the character exists in the mapping, it is replaced with the corresponding
+  "actual" character.
+- If the character is not present in the mapping (e.g., whitespace, punctuation),
+  it is left unchanged.
+
+Interfaces / Integration Points:
+- Cipher.loadKey(keyPath) loads and validates a key file and returns a CipherKey.
+- Cipher.decipher(cipheredText, keyPath) returns a fully deciphered String.
+- If the key file path is provided as just "key.txt", the implementation attempts
+  to load it from "./ciphers/key.txt" if a direct path does not exist.
+
+Testing Plan (Unit Tests):
+- Load a valid key file -> mapping is correct.
+- Decipher a known string -> output matches expectation.
+- Missing key file -> IOException thrown.
+- Malformed key file cases -> IllegalArgumentException thrown:
+  - fewer than 2 lines
+  - empty lines
+  - length mismatch
+  - duplicate characters (either line)
