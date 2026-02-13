@@ -93,7 +93,8 @@ public class Userinterface {
             String content = control.getFileContent(index, keyPath);
             out.println(content);
         } catch (Exception e) {
-            printError(e.getMessage());
+            err.println(e.toString());
+            printUsage();
         }
     }
 
@@ -108,11 +109,11 @@ public class Userinterface {
     }
 
     private void printUsage() {
-        out.println("Usage: java topsecret [number] [optional_key_path]");
+        out.println("Usage: java TopSecret [number] [optional_key_path]");
         out.println("Examples:");
-        out.println("  java topsecret           # list files");
-        out.println("  java topsecret 01        # display file 01 using default key");
-        out.println("  java topsecret 01 key.txt # display file 01 using provided key");
+        out.println("  java TopSecret           # list files");
+        out.println("  java TopSecret 01        # display file 01 using default key");
+        out.println("  java TopSecret 01 key.txt # display file 01 using provided key");
     }
 
 }
