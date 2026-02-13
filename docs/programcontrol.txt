@@ -1,0 +1,26 @@
+Team Member C – ProgramControl Plan + Testing Plan
+
+Responsibilities:
+- Connect the command-line args to FileHandler (list/read) and CipherService (decipher).
+- ProgramControl must never access the filesystem directly.
+
+Behaviors:
+- No args: list available .txt files from FileHandler, numbered 01, 02, ...
+- One arg (N): read the Nth file and display its contents (deciphered if needed).
+- Two args (N keyPath): same as above, but pass keyPath to CipherService.
+- Exit after listing, showing contents, or printing an error message.
+
+Error handling:
+- Non-numeric file number: print a clear error.
+- Out of range file number: print a clear error.
+- File read fails: print a clear error.
+- Decipher fails: print a clear error.
+
+TDD Unit Tests:
+- Use fake FileHandler (no filesystem) to test ProgramControl deterministically.
+- Test listing: sorted + 2-digit numbering.
+- Test selecting file: correct mapping from number -> filename.
+- Test default key path vs override key path is passed to CipherService.
+- Test invalid number/out-of-range returns correct error and does not read.
+- Test read failure returns graceful error.
+- Test decipher failure returns graceful error.
