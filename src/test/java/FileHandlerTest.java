@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 public class FileHandlerTest {
 
-    private static final Path DATA_DIR = Paths.get("data");
+    private static Path DATA_DIR = Paths.get("data");
 
     @BeforeEach
     void prepareTestFiles() throws IOException {

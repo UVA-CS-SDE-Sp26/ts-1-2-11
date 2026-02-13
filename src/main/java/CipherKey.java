@@ -5,9 +5,9 @@ import java.util.Map;
  *
  * The mapping is cipherCharacter -> actualCharacter
  */
-public final class CipherKey {
+public class CipherKey {
 
-    private final Map<Character, Character> cipherToActual;
+    private Map<Character, Character> cipherToActual;
 
     public CipherKey(Map<Character, Character> cipherToActual) {
         this.cipherToActual = Map.copyOf(cipherToActual);

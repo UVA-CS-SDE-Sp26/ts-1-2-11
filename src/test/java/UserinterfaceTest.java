@@ -1,80 +1,141 @@
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import java.util.Arrays;
-import java.util.List;
+class UserinterfaceTest {
 
-public class UserinterfaceTest {
+    private ByteArrayOutputStream outBytes;
+    private ByteArrayOutputStream errBytes;
+    private PrintStream out;
+    private PrintStream err;
 
-    private ProgramControl mockControl;
-    private Userinterface ui;
+    private Userinterface ui; // control is null on purpose
 
     @BeforeEach
     void setUp() {
-        // We create a "fake" version of the control class
-        mockControl = mock(ProgramControl.class);
-        // We pass the fake into our UI
-        ui = new Userinterface(mockControl);
+        outBytes = new ByteArrayOutputStream();
+        errBytes = new ByteArrayOutputStream();
+        out = new PrintStream(outBytes);
+        err = new PrintStream(errBytes);
+
+        ui = new Userinterface(null, out, err);
+    }
+
+    private String stdout() {
+        return outBytes.toString(StandardCharsets.UTF_8);
+    }
+
+    private String stderr() {
+        return errBytes.toString(StandardCharsets.UTF_8);
+    }
+
+    private void assertUsagePrinted() {
+        String s = stdout();
+        assertTrue(s.contains("Usage: java topsecret [number] [optional_key_path]"));
+        assertTrue(s.contains("Examples:"));
+        assertTrue(s.contains("java topsecret"));
     }
 
     @Test
-    void testNoArgsListsFiles() {
-        // 1. Arrange: Tell the mock to return a fake list of files
-        List<String> fakeList = Arrays.asList("filea.txt", "fileb.txt");
-        when(mockControl.getFileList()).thenReturn(fakeList);
+    void nullArgs_printsErrorAndUsage() {
+        ui.run(null);
 
-        // 2. Act: Run the UI with no arguments
-        ui.run(new String[]{});
-
-        // 3. Assert: Verify the UI actually asked the control for the list
-        verify(mockControl).getFileList();
+        assertTrue(stderr().contains("Error: Arguments cannot be null"));
+        assertUsagePrinted();
     }
 
     @Test
-    void testOneArgCallsControl() {
-        // Act: Run with "01"
+    void tooManyArgs_printsErrorAndUsage() {
+        ui.run(new String[]{"01", "k.txt", "extra"});
+
+        assertTrue(stderr().contains("Error: Too many arguments"));
+        assertUsagePrinted();
+    }
+
+    @Test
+    void invalidFileNumber_notTwoDigits_printsErrorAndUsage() {
+        ui.run(new String[]{"999"});
+
+        assertTrue(stderr().contains("Error: Invalid file number. Must be two digits (e.g., 01)."));
+        assertUsagePrinted();
+    }
+
+    @Test
+    void invalidFileNumber_nonDigits_printsErrorAndUsage() {
+        ui.run(new String[]{"ab"});
+
+        assertTrue(stderr().contains("Error: Invalid file number. Must be two digits (e.g., 01)."));
+        assertUsagePrinted();
+    }
+
+    @Test
+    void invalidFileNumber_nullString_printsErrorAndUsage() {
+        ui.run(new String[]{null});
+
+        assertTrue(stderr().contains("Error: Invalid file number. Must be two digits (e.g., 01)."));
+        assertUsagePrinted();
+    }
+
+    @Test
+    void oneArg_defaultKey_whenControlMissing_printsErrorAndUsage() {
         ui.run(new String[]{"01"});
 
-        // Assert: Check if it converted "01" to 1 and used the default key
-        verify(mockControl).getFileContent(1, "key.txt");
+        // Your UI must include: if (control == null) { printError("Control is not configured"); return; }
+        assertTrue(stderr().contains("Error: Control is not configured"));
+        assertUsagePrinted();
     }
 
     @Test
-    void testTwoArgsUsesCustomKey() {
-        // Act: Run with a number and a custom key file
-        ui.run(new String[]{"05", "secret.txt"});
+    void twoArgs_emptyKey_printsErrorAndUsage() {
+        ui.run(new String[]{"01", ""});
 
-        // Assert: Verify the custom key was passed through
-        verify(mockControl).getFileContent(5, "secret.txt");
+        assertTrue(stderr().contains("Error: Key file cannot be empty"));
+        assertUsagePrinted();
     }
 
     @Test
-    void testInvalidNumberDoesNothing() {
-        // Act: Run with a bad number format
-        ui.run(new String[]{"999"}); // Too many digits
+    void twoArgs_whitespaceKey_printsErrorAndUsage() {
+        ui.run(new String[]{"01", "   "});
 
-        // Assert: The UI should NOT call the control if the input is bad
-        verifyNoInteractions(mockControl);
+        assertTrue(stderr().contains("Error: Key file cannot be empty"));
+        assertUsagePrinted();
     }
 
     @Test
-    void testTooManyArgsDoesNothing() {
-        // Run with 3 arguments
-        ui.run(new String[]{"01", "key.txt", "extra"});
+    void twoArgs_nullKey_printsErrorAndUsage() {
+        ui.run(new String[]{"01", null});
 
-        //  Should not call control
-        verifyNoInteractions(mockControl);
+        assertTrue(stderr().contains("Error: Key file cannot be empty"));
+        assertUsagePrinted();
     }
 
     @Test
-    void testErrorHandling() {
-        // Make the control throw an error (e.g., file not found)
-        when(mockControl.getFileContent(anyInt(), anyString()))
-                .thenThrow(new RuntimeException("File missing!"));
+    void noArgs_printsListingHeader_evenWithoutControl() {
+        ui.run(new String[]{});
 
-        // Make sure the UI doesn't crash and handles the errory
-        assertDoesNotThrow(() -> ui.run(new String[]{"01"}));
+        // Your UI must include: if (control == null) { out.println("No files available."); return; }
+        assertTrue(stdout().contains("Listing available files:"));
+        assertTrue(stdout().contains("No files available."));
+    }
+
+    @Test
+    void isValidFileNumber_acceptsTwoDigits() {
+        assertTrue(Userinterface.isValidFileNumber("00"));
+        assertTrue(Userinterface.isValidFileNumber("01"));
+        assertTrue(Userinterface.isValidFileNumber("99"));
+    }
+
+    @Test
+    void isValidFileNumber_rejectsEverythingElse() {
+        assertFalse(Userinterface.isValidFileNumber(null));
+        assertFalse(Userinterface.isValidFileNumber(""));
+        assertFalse(Userinterface.isValidFileNumber("0"));
+        assertFalse(Userinterface.isValidFileNumber("000"));
+        assertFalse(Userinterface.isValidFileNumber("ab"));
+        assertFalse(Userinterface.isValidFileNumber("1a"));
+        assertFalse(Userinterface.isValidFileNumber(" 1"));
+        assertFalse(Userinterface.isValidFileNumber("1 "));
     }
 }

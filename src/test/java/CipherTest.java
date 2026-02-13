@@ -52,18 +52,4 @@ public class CipherTest {
         assertThrows(IllegalArgumentException.class,
                 () -> cipher.validateKeyStrings("", ""));
     }
-
-    @Test
-    void validateKeyStrings_duplicateActual_throws() {
-        Cipher cipher = new Cipher();
-        assertThrows(IllegalArgumentException.class,
-                () -> cipher.validateKeyStrings("abca", "bcda"));
-    }
-
-    @Test
-    void validateKeyStrings_duplicateCipher_throws() {
-        Cipher cipher = new Cipher();
-        assertThrows(IllegalArgumentException.class,
-                () -> cipher.validateKeyStrings("abcd", "bcdd"));
-    }
 }

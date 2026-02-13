@@ -17,7 +17,7 @@ import java.util.Arrays;
  */
 public class FileHandler {
 
-    private final File dataDir;
+    private File dataDir;
 
     public FileHandler() {
         dataDir = new File("data");
@@ -73,5 +73,21 @@ public class FileHandler {
         if (filename == null || filename.isBlank()) {
             throw new IllegalArgumentException("Filename cannot be null or blank");
         }
+
+        // Block any path separators (Linux/macOS + Windows)
+        if (filename.contains("/") || filename.contains("\\")) {
+            throw new IllegalArgumentException("Invalid filename: path separators are not allowed");
+        }
+
+        // Block traversal attempts
+        if (filename.contains("..")) {
+            throw new IllegalArgumentException("Invalid filename: directory traversal is not allowed");
+        }
+
+        // Only allow .txt
+        if (!filename.endsWith(".txt")) {
+            throw new IllegalArgumentException("Invalid filename: must end with .txt");
+        }
+
     }
 }

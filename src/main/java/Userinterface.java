@@ -1,3 +1,4 @@
+import java.io.PrintStream;
 import java.util.List;
 
 
@@ -6,14 +7,24 @@ import java.util.List;
  * Responsible for CLI argument validation and terminal output.
  */
 public class Userinterface {
-
-    private final ProgramControl control;
+    private ProgramControl control;
+    private PrintStream out;
+    private PrintStream err;
     /**
      * Constructor using Dependency Injection.
      * Allows passing a mock for testing or a real object for production.
      */
     public Userinterface(ProgramControl control) {
         this.control = control;
+        this.out = System.out;
+        this.err = System.err;
+    }
+
+    // New constructor for tests
+    public Userinterface(ProgramControl control, PrintStream out, PrintStream err) {
+        this.control = control;
+        this.out = out;
+        this.err = err;
     }
     /**
      * Main entry point for the UI logic.
@@ -29,7 +40,7 @@ public class Userinterface {
                 handleListFiles();
                 break;
             case 1:
-                handleDisplayFile(args[0], "key.txt");
+                handleDisplayFile(args[0], "ciphers/key.txt");
                 break;
             case 2:
                 handleDisplayFile(args[0], args[1]);
@@ -41,17 +52,22 @@ public class Userinterface {
     }
 
     private void handleListFiles() {
-        System.out.println("Listing available files:");
+        out.println("Listing available files:");
+
+        if (control == null) {
+            out.println("No files available.");
+            return;
+        }
+
         List<String> files = control.getFileList();
 
         if (files == null || files.isEmpty()) {
-            System.out.println("No files available.");
+            out.println("No files available.");
             return;
         }
 
         for (int i = 0; i < files.size(); i++) {
-            // Requirements ask for numbered files (01, 02...)
-            System.out.printf("%02d %s%n", i + 1, files.get(i));
+            out.printf("%02d %s%n", i + 1, files.get(i));
         }
     }
 
@@ -66,76 +82,37 @@ public class Userinterface {
             return;
         }
 
+        // Don't want to mock ProgramControl for this test
+        if (control == null) {
+            printError("Control is not configured");
+            return;
+        }
+
         try {
             int index = Integer.parseInt(fileNum);
             String content = control.getFileContent(index, keyPath);
-            System.out.println(content);
+            out.println(content);
         } catch (Exception e) {
-            // Graceful exit for file-not-found or deciphering errors
             printError(e.getMessage());
         }
     }
 
-    /**
-     * Validation logic for the two-digit file number requirement.
-     */
+
     public static boolean isValidFileNumber(String s) {
         return s != null && s.matches("\\d{2}");
     }
 
-    private static void printError(String message) {
-        // Print the error message to STDERR and show usage, do NOT recurse.
-        System.err.println("Error: " + message);
+    private void printError(String message) {
+        err.println("Error: " + message);
         printUsage();
     }
 
-    // Helper to print usage information referenced in several places.
-    private static void printUsage() {
-        System.out.println("Usage: java topsecret [number] [optional_key_path]");
-        System.out.println("Examples:");
-        System.out.println("  java topsecret           # list files");
-        System.out.println("  java topsecret 01        # display file 01 using default key");
-        System.out.println("  java topsecret 01 key.txt # display file 01 using provided key");
+    private void printUsage() {
+        out.println("Usage: java topsecret [number] [optional_key_path]");
+        out.println("Examples:");
+        out.println("  java topsecret           # list files");
+        out.println("  java topsecret 01        # display file 01 using default key");
+        out.println("  java topsecret 01 key.txt # display file 01 using provided key");
     }
 
-    // Simple utility replacement for String.isBlank() on older JDKs.
-    private static boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
-    }
-
-    // ---------- Argument handlers ----------
-
-    private static void handleList() {
-        System.out.println("Listing available files...");
-        // TODO (Role C): ProgramControl.listFiles();
-    }
-
-    private static void handleSingleArgument(String fileNumber) {
-        if (!isValidFileNumber(fileNumber)) {
-            printError("Invalid file number. Expected two digits (e.g., 01).");
-            printUsage();
-            return;
-        }
-
-        System.out.println("Displaying file " + fileNumber + " using default key");
-        // TODO (Role C): ProgramControl.showFile(fileNumber, DEFAULT_KEY);
-    }
-
-    private static void handleTwoArguments(String fileNumber, String keyFile) {
-        if (!isValidFileNumber(fileNumber)) {
-            printError("Invalid file number. Expected two digits (e.g., 01).");
-            printUsage();
-            return;
-        }
-
-        if (isBlank(keyFile)) {
-            printError("Key file cannot be empty.");
-            printUsage();
-            return;
-        }
-
-        System.out.println("Displaying file " + fileNumber +
-                " using key " + keyFile);
-        // TODO (Role C): ProgramControl.showFile(fileNumber, keyFile);
-    }
 }

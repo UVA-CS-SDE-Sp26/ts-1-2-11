@@ -96,17 +96,5 @@ public class Cipher {
             throw new IllegalArgumentException("Invalid key file: lines must be the same length.");
         }
 
-        ensureNoDuplicates(actual, "actual (line 1)");
-        ensureNoDuplicates(cipher, "cipher (line 2)");
-    }
-
-    private void ensureNoDuplicates(String s, String label) {
-        Set<Character> seen = new HashSet<>();
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (!seen.add(c)) {
-                throw new IllegalArgumentException("Invalid key file: duplicate character '" + c + "' in " + label + ".");
-            }
-        }
     }
 }

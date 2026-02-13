@@ -3,7 +3,9 @@
  */
 public class TopSecret {
     public static void main(String[] args) {
-        ProgramControl control = new ProgramControl();
+        FileHandler fileHandler = new FileHandler();
+        Cipher cipher = new Cipher();
+        ProgramControl control = new ProgramControl(fileHandler, cipher);
         Userinterface ui = new Userinterface(control);
         ui.run(args);
     }
