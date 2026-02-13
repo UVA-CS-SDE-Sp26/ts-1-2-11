@@ -33,9 +33,10 @@ class UserinterfaceTest {
 
     private void assertUsagePrinted() {
         String s = stdout();
-        assertTrue(s.contains("Usage: java topsecret [number] [optional_key_path]"));
+        System.out.print(s);
+        assertTrue(s.contains("Usage: java TopSecret [number] [optional_key_path]"));
         assertTrue(s.contains("Examples:"));
-        assertTrue(s.contains("java topsecret"));
+        assertTrue(s.contains("java TopSecret"));
     }
 
     @Test

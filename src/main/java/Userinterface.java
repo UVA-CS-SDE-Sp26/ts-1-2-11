@@ -111,9 +111,9 @@ public class Userinterface {
     private void printUsage() {
         out.println("Usage: java TopSecret [number] [optional_key_path]");
         out.println("Examples:");
-        out.println("  java TopSecret           # list files");
-        out.println("  java TopSecret 01        # display file 01 using default key");
-        out.println("  java TopSecret 01 key.txt # display file 01 using provided key");
+        out.println("java TopSecret           # list files");
+        out.println("java TopSecret 01        # display file 01 using default key");
+        out.println("java TopSecret 01 key.txt # display file 01 using provided key");
     }
 
 }
