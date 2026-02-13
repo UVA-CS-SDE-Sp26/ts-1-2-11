@@ -61,20 +61,20 @@ public class UserinterfaceTest {
 
     @Test
     void testTooManyArgsDoesNothing() {
-        // Act: Run with 3 arguments
+        // Run with 3 arguments
         ui.run(new String[]{"01", "key.txt", "extra"});
 
-        // Assert: Should not call control
+        //  Should not call control
         verifyNoInteractions(mockControl);
     }
 
     @Test
     void testErrorHandling() {
-        // Arrange: Make the control throw an error (e.g., file not found)
+        // Make the control throw an error (e.g., file not found)
         when(mockControl.getFileContent(anyInt(), anyString()))
                 .thenThrow(new RuntimeException("File missing!"));
 
-        // Act & Assert: Ensure the UI catches the error and doesn't crash
+        // Make sure the UI doesn't crash and handles the errory
         assertDoesNotThrow(() -> ui.run(new String[]{"01"}));
     }
 }

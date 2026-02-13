@@ -1,38 +1,36 @@
-TopSecret - User Interface (CLI)
+TopSecret
+2/8/26
+Himesh Ahuja (Team Member A)
 
-Purpose:
-This document describes the command-line options for the TopSecret program and the expected behavior.
+Goal:
+The goal of the Userinterface component is to handle all command-line interaction for the TopSecret program.
+No other class in the program reads from or interprets command-line arguments directly.
 
-Usage:
-  java topsecret [number] [optional_key_path]
+Assumptions:
+The program is executed from the project root directory.
+The program is launched using the java topsecret command.
+Any data files and key files referenced by the user exist unless an error is reported.
 
-Options:
-  (no arguments)
-    - Lists available files. Files are shown with a two-digit index (01, 02, ...)
+Responsibilities:
+- Parse command-line arguments provided by the user.
+- Display a list of available files when no arguments are supplied.
+- Validate that file identifiers are correctly formatted as two-digit numbers.
+- Accept an optional key file path for deciphering.
+- Delegate all program execution logic to the ProgramControl component.
+- Display usage information and error messages when invalid input is detected.
 
-  [number]
-    - Two-digit file number to display (example: 01).
-    - Uses the default key file (ciphers/key.txt or key.txt depending on program configuration).
+Design:
+Other components do not interact with the command line.
+The Userinterface component interprets user input and invokes ProgramControl to perform all application logic.
+ProgramControl is provided to Userinterface through constructor injection to support isolation and unit testing.
 
-  [number] [optional_key_path]
-    - Two-digit file number to display and a path to a key file to use for deciphering.
+Error Handling:
 
-Examples:
-  java topsecret
-    Lists files stored by the program.
+- If an invalid number of arguments is provided, usage information is displayed.
+- If a file number is not exactly two digits, the input is rejected.
+- If required arguments are missing, an error message and usage information are displayed.
+- Errors returned from ProgramControl are printed to the user.
 
-  java topsecret 01
-    Display file 01 using the default key.
-
-  java topsecret 01 ciphers/key.txt
-    Display file 01 using the provided key file at ciphers/key.txt.
-
-Behavior & Errors:
-  - File numbers must be two digits (regex: "\\d{2}").
-    If an invalid number is provided, the program prints an error and shows usage.
-  - If the key file path is missing or blank when required, the program prints an error and shows usage.
-  - On other errors (file-not-found, decrypt errors), the program prints the error message and usage.
-
-Notes for Developers / Testers:
-  - The `Userinterface` class accepts a `ProgramControl` instance via constructor injection. For unit tests, mock `ProgramControl` to return file lists and file content. Mockito or similar mocking frameworks make this straightforward.
-  - Helper methods to validate and print usage are located in `Userinterface.java`.
+Testing Plan:
+Unit tests verify that valid command-line arguments are accepted and correctly forwarded to ProgramControl, and that invalid arguments result in appropriate error messages and usage output.
+ProgramControl is mocked during testing to isolate Userinterface behavior.
